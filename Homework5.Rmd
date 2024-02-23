@@ -1,0 +1,165 @@
+---
+title: 'STA 5207: Homework 5'
+date: 'Due: Friday, February 23 by 11:59 PM'
+output:
+  html_document:
+    df_print: paged
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+Include your R code in an R chunks as part of your answer. In addition, your written answer to each exercise should be self-contained so that the grader can determine your solution without reading your code or deciphering its output.
+
+## Exercise 1 (Using `step`) [40 points]
+
+For this exercise we will use the `prostate` data set from the `faraway` package. You can also find the data in `prostate.csv` on Canvas. The data set comes from a study on 97 men with prostate cancer who were due to receive a radical prostatectomy. The variables in the data set are
+
+-   `lcavol`: $\log(\text{cancer volume})$.
+-   `lweight`: $\log(\text{prostate weight})$.
+-   `age`: The patient's age in years.
+-   `lbph`: $\log(\text{benign prostatic hyperplasia amount})$.
+-   `svi`: Seminal vesicle invasion.
+-   `lcp`: $\log(\text{capsular penetration})$.
+-   `gleason`: Gleason score.
+-   `pgg45`: percentage Gleason score 4 or 5.
+-   `lpsa`: $\log(\text{prostate specific antigen})$.
+
+In the following exercises, use `lpsa` as the response and the other variables as predictors.
+
+1.  (6 points) Identify the best model based on AIC and BIC using forward selection. Create a table listing each quality criterion (AIC, BIC) and the subset of variables chosen by the method.
+
+    ```{r}
+    data(prostate, package = 'faraway')
+    mod_start <- lm(lpsa ~ 1, data=prostate)
+    mod_forwd_aic <- step(mod_start, scope=lpsa ~ lcavol + lweight + age + lbph + svi + lcp + gleason + pgg45, direction = 'forward')
+    n <- nrow(prostate)
+    mod_forwd_bic <- step(mod_start, scope=lpsa ~ lcavol + lweight + age + lbph + svi + lcp + gleason + pgg45, direction = 'forward', k=log(n))
+    print(coef(mod_forwd_aic))
+    print(coef(mod_forwd_bic))
+
+
+    quality_criterion <- c('AIC', 'BIC')
+    variables <- c('lcavol,lweight,svi,lbph,age', 'lcavol,lweight,svi')
+    criterion_values <- c(extractAIC(mod_forwd_aic)[2], extractAIC(mod_forwd_bic, k=log(n))[2])
+    data.frame(quality_criterion, variables, criterion_values)
+
+    ```
+
+    **Answer:** The best model using forward selection based on AIC was the model with predictors "lcavol", "lweight", "svi", "lbph", and "age" with a final AIC of -61.37439. The best model using forward selection based on BIC was the model with predictors "lcavol", "lweight", and "svi" with a final AIC of -50.37736. The table above shows the quality criterion used, variables selected, and the criterion values of each model.
+
+2.  (6 points) Identify the best model based on AIC and BIC using backward selection. Create a table listing each quality criterion (AIC, BIC) and the subset of variables chosen by the method.
+
+    ```{r}
+    mod_all_preds <- lm(lpsa ~ ., data=prostate)
+    mod_back_aic <- step(mod_all_preds, direction = 'backward')
+    n <- nrow(prostate)
+    mod_back_bic <- step(mod_all_preds, direction = 'backward', k=log(n))
+    print(coef(mod_back_aic))
+    print(coef(mod_back_bic))
+    quality_criterion <- c('AIC', 'BIC')
+    variables <- c('lcavol,lweight,svi,lbph,age', 'lcavol,lweight,svi')
+    criterion_values <- c(extractAIC(mod_back_aic)[2], extractAIC(mod_back_bic, k=log(n))[2])
+    data.frame(quality_criterion, variables, criterion_values)
+    ```
+
+    **Answer:** The best model using backward selection based on AIC was the model with predictors "lcavol", "lweight", "svi", "lbph", and "age" with a final AIC of -61.37439. The best model using backward selection based on BIC was the model with predictors "lcavol", "lweight", and "svi" with a final AIC of -50.37736. The table above shows the quality criterion used, variables selected, and the criterion values of each model.
+
+3.  (6 points) Identify the best model based on AIC and BIC using stepwise selection. Create a table listing each quality criterion (AIC, BIC) and the subset of variables chosen by the method.
+
+    ```{r}
+    mod_start <- lm(lpsa ~ 1, data=prostate)
+    mod_stepwise_aic <- step(mod_start, scope=lpsa ~ lcavol + lweight + age + lbph + svi + lcp + gleason + pgg45, direction = 'both')
+    n <- nrow(prostate)
+    mod_stepwise_bic <- step(mod_start, scope=lpsa ~ lcavol + lweight + age + lbph + svi + lcp + gleason + pgg45, direction = 'both', k=log(n))
+    print(coef(mod_stepwise_aic))
+    print(coef(mod_stepwise_bic))
+
+
+    quality_criterion <- c('AIC', 'BIC')
+    variables <- c('lcavol,lweight,svi,lbph,age', 'lcavol,lweight,svi')
+    criterion_values <- c(extractAIC(mod_stepwise_aic)[2], extractAIC(mod_stepwise_bic, k=log(n))[2])
+    data.frame(quality_criterion, variables, criterion_values)
+    ```
+
+    **Answer:** The best model using stepwise selection based on AIC was the model with predictors "lcavol", "lweight", "svi", "lbph", and "age" with a final AIC of -61.37439. The best model using stepwise selection based on BIC was the model with predictors "lcavol", "lweight", and "svi" with a final AIC of -50.37736. The table above shows the quality criterion used, variables selected, and the criterion values of each model.
+
+4.  (12 points) Identify the best model based on $R_a^2$, AIC, and BIC using best subset selection. Create a table listing each quality criterion ($R_a^2$, AIC, BIC) and the subset of variables chosen by the method.
+
+    ```{r}
+    library(leaps)
+    mod_exhaustive = summary(regsubsets(lpsa ~ ., data=prostate, nvmax = 8))
+    bestr2 <- mod_exhaustive$which[which.max(mod_exhaustive$adjr2),]
+    p <- ncol(mod_exhaustive$which)
+    mod_aic <- n * log(mod_exhaustive$rss / n) + 2 * (2:p)
+    mod_bic <- n * log(mod_exhaustive$rss / n) + log(n) * (2:p)
+    bestaic <- mod_exhaustive$which[which.min(mod_aic),]
+    bestbic <- mod_exhaustive$which[which.min(mod_bic),]
+    quality_criterion <- c('R2_a', 'AIC', 'BIC')
+    variables_chosen <- c('lcavol, lweight, age, lbph, svi, lcp, pgg45', 'lcavol, lweight, age, lbph, svi', 'lcavol, lweight, svi')
+    criterion_values <- c(max(mod_exhaustive$adjr2), min(mod_aic), min(mod_bic))
+    data.frame(quality_criterion, variables_chosen, criterion_values)
+    ```
+
+    **Answer:** Using best subset selection, the best model based on $R^2_a$ is the model with predictors "lcavol", "lweight", "age", "lbph", "svi", "lcp", and "pgg45". Using best subset selection, the best model based on AIC is the model with predictors "lcavol", "lweight", "age", "lbph", and "svi". Using best subset selection, the best model based on BIC is the model with predictors "lcavol", "lweight", and "svi".
+
+5.  (10 points) For each unique candidate model chosen in parts 1 - 4, report their $\text{RMSE}_{\text{LOOCV}}$. Which model do you prefer based on this criteria?
+
+    ```{r}
+    calc_loocv_rmse = function(model) {
+      sqrt(mean((resid(model) / (1 - hatvalues(model))) ^ 2))
+    }
+
+    ```
+
+    **Answer:**
+
+## Exercise 2 (`Boston` Housing Data) [40 points]
+
+For this exercise we will use the `Boston` data set from the `ISLR2` package. You can also find the data in `Boston.csv` on Canvas. The data set contains housing values in 506 suburbs of Boston. There are a total of 12 predictors. You can type `?ISLR2::Boston` in `R` to read about the data set and the meaning of the predictors. In the following exercises, use `crim` (the per capita crime rate) as the response and the other variables as predictors.
+
+1.  (6 points) Identify the best model based on AIC and BIC using forward selection. Create a table listing each quality criterion (AIC, BIC) and the subset of variables chosen by the method.
+
+2.  (6 points) Identify the best model based on AIC and BIC using backward selection. Create a table listing each quality criterion (AIC, BIC) and the subset of variables chosen by the method.
+
+3.  (6 points) Identify the best model based on AIC and BIC using stepwise selection. Create a table listing each quality criterion (AIC, BIC) and the subset of variables chosen by the method.
+
+4.  (12 points) Identify the best model based on $R_a^2$, AIC, and BIC using best subset selection. Note that you have to set `nvmax = 12` when calling `regsubsets`, since there are 12 predictors. Create a table listing each quality criterion ($R_a^2$, AIC, and BIC) and the subset of the variables chosen by the method.
+
+5.  (10 points) For each unique candidate model chosen in parts 1 - 4, report their $\text{RMSE}_{\text{LOOCV}}$. Which model do you prefer based on this criteria?
+
+## Exercise 3 (Post-Selection Inference and Data Splitting) [20 points]
+
+For this exercise, we will use the `prostate_fake_train.csv` and `prostate_fake_test.csv` data sets on Canvas. These data sets are subsets of the `prostate` data set you analyzed in Exercise 1; however, I replaced the `lpsa` column with a column of noise drawn from a uniform distribution on $[-1, 1]$. I then split the data set into a training subset and a testing subset. I ran the following code:
+
+```{r, eval = FALSE}
+library(tidyverse)
+
+data(prostate, package = 'faraway')
+
+# set random seed for reproducability
+set.seed(123456)
+
+# replace the lpsa column with pure noise
+prostate_fake = prostate |> 
+    select(-lpsa) |> 
+    mutate(noise = runif(nrow(prostate), min = -1, max = 1))
+
+# train/test split
+n = nrow(prostate)
+train = sample(1:n, size = 49)
+test = !(1:n %in% train)
+
+# write data to a file
+write_csv(prostate_fake[train,], 'prostate_fake_train.csv')
+write_csv(prostate_fake[test,], 'prostate_fake_test.csv')
+```
+
+For this exercise, use `noise` as the response and the remaining variables as predictors. Note that by design there is no relationship between `noise` and any of the predictors.
+
+1.  (6 points) Identify the best model using AIC and backward selection based on the data in `prostate_fake_train.csv`. Report the subset of the variables chosen by this method.
+
+2.  (7 points) Using your model from part 1, perform a $t$-test at the $\alpha = 0.05$ significance level for each predictor. Report the predictors that are significant according to this test. Should we trust the results of this test? Why or why not?
+
+3.  (7 points) Using the predictors you selected in part 1, fit a multiple linear regression model on the data in `prostate_fake_test.csv`. Perform a $t$-test at the $\alpha = 0.05$ significance level for each predictor. Report the predictors that are significant according to this test. Do the results match the results from part 2? Should we trust these results? Why or why not?
