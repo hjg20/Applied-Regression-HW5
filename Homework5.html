@@ -2176,10 +2176,11 @@ frame</code></pre>
 <pre class="r"><code>print(min(frame$LOOCV))</code></pre>
 <pre><code>## [1] 0.736896</code></pre>
 <p><strong>Answer:</strong> The LOOCV values for each model are reported
-in the data frame above. The model we prefer is the model with the
-lowest LOOCV value which is the AIC model from part 1 which has
-predictors chosen of “lcavol”, “lweight”, “svi”, “lbph”, and
-“age”.</p></li>
+in the data frame above. The models we prefer are the models with the
+lowest LOOCV value which is the AIC model from part 1, the AIC model
+from part 2, the AIC model from part 3, and the AIC model from part 4
+which all have predictors chosen of “lcavol”, “lweight”, “svi”, “lbph”,
+and “age”.</p></li>
 </ol>
 </div>
 <div id="exercise-2-boston-housing-data-40-points" class="section level2">
@@ -2357,7 +2358,7 @@ backward selection. Create a table listing each quality criterion (AIC,
 BIC) and the subset of variables chosen by the method.</p>
 <pre class="r"><code>data(Boston, package=&#39;ISLR2&#39;)
 mod_start &lt;- lm(crim ~ ., data=Boston)
-mod_forwd_aic &lt;- step(mod_start, direction = &#39;backward&#39;)</code></pre>
+mod_back_aic &lt;- step(mod_start, direction = &#39;backward&#39;)</code></pre>
 <pre><code>## Start:  AIC=1900.87
 ## crim ~ zn + indus + chas + nox + rm + age + dis + rad + tax + 
 ##     ptratio + lstat + medv
@@ -2368,12 +2369,12 @@ mod_forwd_aic &lt;- step(mod_start, direction = &#39;backward&#39;)</code></pre>
 ## - indus    1     20.31 20595 1899.4
 ## - tax      1     22.24 20597 1899.4
 ## - rm       1     44.79 20619 1900.0
-## &lt;none&gt;                 20574 1900.9
+## &lt;none&gt;                 20575 1900.9
 ## - ptratio  1    111.10 20686 1901.6
 ## - lstat    1    140.23 20715 1902.3
 ## - nox      1    147.88 20722 1902.5
 ## - zn       1    246.97 20822 1904.9
-## - dis      1    535.94 21110 1911.9
+## - dis      1    535.94 21111 1911.9
 ## - medv     1    564.68 21139 1912.6
 ## - rad      1   2043.03 22618 1946.8
 ## 
@@ -2390,7 +2391,7 @@ mod_forwd_aic &lt;- step(mod_start, direction = &#39;backward&#39;)</code></pre>
 ## - ptratio  1    112.36 20687 1899.6
 ## - lstat    1    152.46 20727 1900.6
 ## - nox      1    160.61 20735 1900.8
-## - zn       1    251.86 20826 1903.0
+## - zn       1    251.86 20827 1903.0
 ## - medv     1    564.95 21140 1910.6
 ## - dis      1    576.47 21151 1910.8
 ## - rad      1   2060.74 22635 1945.2
@@ -2401,7 +2402,7 @@ mod_forwd_aic &lt;- step(mod_start, direction = &#39;backward&#39;)</code></pre>
 ## 
 ##           Df Sum of Sq   RSS    AIC
 ## - chas     1     25.04 20620 1896.0
-## - rm       1     51.61 20646 1896.6
+## - rm       1     51.61 20647 1896.6
 ## - tax      1     55.48 20650 1896.7
 ## &lt;none&gt;                 20595 1897.4
 ## - ptratio  1    127.12 20722 1898.5
@@ -2419,7 +2420,7 @@ mod_forwd_aic &lt;- step(mod_start, direction = &#39;backward&#39;)</code></pre>
 ## - tax      1     51.38 20671 1895.2
 ## - rm       1     53.90 20674 1895.3
 ## &lt;none&gt;                 20620 1896.0
-## - ptratio  1    124.52 20744 1897.0
+## - ptratio  1    124.52 20745 1897.0
 ## - lstat    1    141.65 20762 1897.5
 ## - nox      1    229.05 20849 1899.6
 ## - zn       1    276.43 20896 1900.7
@@ -2454,7 +2455,7 @@ mod_forwd_aic &lt;- step(mod_start, direction = &#39;backward&#39;)</code></pre>
 ## - dis      1     535.9 21267 1905.6
 ## - rad      1    5666.7 26398 2015.0</code></pre>
 <pre class="r"><code>n &lt;- nrow(Boston)
-mod_forwd_bic &lt;- step(mod_start, direction = &#39;backward&#39;, k=log(n))</code></pre>
+mod_back_bic &lt;- step(mod_start, direction = &#39;backward&#39;, k=log(n))</code></pre>
 <pre><code>## Start:  AIC=1955.81
 ## crim ~ zn + indus + chas + nox + rm + age + dis + rad + tax + 
 ##     ptratio + lstat + medv
@@ -2469,8 +2470,8 @@ mod_forwd_bic &lt;- step(mod_start, direction = &#39;backward&#39;, k=log(n))</c
 ## - lstat    1    140.23 20715 1953.0
 ## - nox      1    147.88 20722 1953.2
 ## - zn       1    246.97 20822 1955.6
-## &lt;none&gt;                 20574 1955.8
-## - dis      1    535.94 21110 1962.6
+## &lt;none&gt;                 20575 1955.8
+## - dis      1    535.94 21111 1962.6
 ## - medv     1    564.68 21139 1963.3
 ## - rad      1   2043.03 22618 1997.5
 ## 
@@ -2486,7 +2487,7 @@ mod_forwd_bic &lt;- step(mod_start, direction = &#39;backward&#39;, k=log(n))</c
 ## - ptratio  1    112.36 20687 1946.1
 ## - lstat    1    152.46 20727 1947.1
 ## - nox      1    160.61 20735 1947.3
-## - zn       1    251.86 20826 1949.5
+## - zn       1    251.86 20827 1949.5
 ## &lt;none&gt;                 20575 1949.6
 ## - medv     1    564.95 21140 1957.1
 ## - dis      1    576.47 21151 1957.3
@@ -2498,7 +2499,7 @@ mod_forwd_bic &lt;- step(mod_start, direction = &#39;backward&#39;, k=log(n))</c
 ## 
 ##           Df Sum of Sq   RSS    AIC
 ## - chas     1     25.04 20620 1938.2
-## - rm       1     51.61 20646 1938.9
+## - rm       1     51.61 20647 1938.9
 ## - tax      1     55.48 20650 1939.0
 ## - ptratio  1    127.12 20722 1940.8
 ## - lstat    1    144.65 20740 1941.2
@@ -2515,7 +2516,7 @@ mod_forwd_bic &lt;- step(mod_start, direction = &#39;backward&#39;, k=log(n))</c
 ##           Df Sum of Sq   RSS    AIC
 ## - tax      1     51.38 20671 1933.3
 ## - rm       1     53.90 20674 1933.3
-## - ptratio  1    124.52 20744 1935.1
+## - ptratio  1    124.52 20745 1935.1
 ## - lstat    1    141.65 20762 1935.5
 ## - nox      1    229.05 20849 1937.6
 ## &lt;none&gt;                 20620 1938.2
@@ -2558,7 +2559,7 @@ mod_forwd_bic &lt;- step(mod_start, direction = &#39;backward&#39;, k=log(n))</c
 ## - ptratio  1     170.8 21015 1923.0
 ## - nox      1     258.1 21103 1925.0
 ## &lt;none&gt;                 20845 1925.0
-## - zn       1     279.8 21124 1925.6
+## - zn       1     279.8 21125 1925.6
 ## - dis      1     700.2 21545 1935.5
 ## - medv     1    1519.5 22364 1954.4
 ## - rad      1    5949.3 26794 2045.9
@@ -2584,20 +2585,18 @@ mod_forwd_bic &lt;- step(mod_start, direction = &#39;backward&#39;, k=log(n))</c
 ## - medv  1    1214.7 22381 1942.4
 ## - rad   1    6465.2 27632 2049.0</code></pre>
 <pre class="r"><code>print(coef(mod_forwd_aic))</code></pre>
-<pre><code>## (Intercept)          zn         nox         dis         rad     ptratio 
-##  17.4668235   0.0449679 -12.4578238  -0.9425497   0.5615224  -0.3470306 
-##       lstat        medv 
-##   0.1147895  -0.1902559</code></pre>
+<pre><code>## (Intercept)         rad       lstat        medv     ptratio 
+##   4.9361233   0.5475773   0.1435044  -0.1198319  -0.3070764</code></pre>
 <pre class="r"><code>print(coef(mod_forwd_bic))</code></pre>
-<pre><code>## (Intercept)          zn         dis         rad        medv 
-##  5.26547997  0.05486634 -0.72291374  0.50020971 -0.19121698</code></pre>
+<pre><code>## (Intercept)         rad       lstat 
+##  -4.3814053   0.5228128   0.2372846</code></pre>
 <pre class="r"><code>quality_criterion &lt;- c(&#39;AIC&#39;, &#39;BIC&#39;)
 variables &lt;- c(&#39;zn,nox,dis,rad,ptratio,lstat,medv&#39;, &#39;zn,dis,rad,medv&#39;)
 criterion_values &lt;- c(extractAIC(mod_forwd_aic)[2], extractAIC(mod_forwd_bic, k=log(n))[2])
 data.frame(quality_criterion, variables, criterion_values)</code></pre>
 <div data-pagedtable="false">
 <script data-pagedtable-source type="application/json">
-{"columns":[{"label":["quality_criterion"],"name":[1],"type":["chr"],"align":["left"]},{"label":["variables"],"name":[2],"type":["chr"],"align":["left"]},{"label":["criterion_values"],"name":[3],"type":["dbl"],"align":["right"]}],"data":[{"1":"AIC","2":"zn,nox,dis,rad,ptratio,lstat,medv","3":"1894.700"},{"1":"BIC","2":"zn,dis,rad,medv","3":"1920.358"}],"options":{"columns":{"min":{},"max":[10]},"rows":{"min":[10],"max":[10]},"pages":{}}}
+{"columns":[{"label":["quality_criterion"],"name":[1],"type":["chr"],"align":["left"]},{"label":["variables"],"name":[2],"type":["chr"],"align":["left"]},{"label":["criterion_values"],"name":[3],"type":["dbl"],"align":["right"]}],"data":[{"1":"AIC","2":"zn,nox,dis,rad,ptratio,lstat,medv","3":"1903.797"},{"1":"BIC","2":"zn,dis,rad,medv","3":"1919.116"}],"options":{"columns":{"min":{},"max":[10]},"rows":{"min":[10],"max":[10]},"pages":{}}}
   </script>
 </div>
 <p><strong>Answer:</strong> The best model using backward selection
@@ -2612,7 +2611,7 @@ stepwise selection. Create a table listing each quality criterion (AIC,
 BIC) and the subset of variables chosen by the method.</p>
 <pre class="r"><code>data(Boston, package=&#39;ISLR2&#39;)
 mod_start &lt;- lm(crim ~ 1, data=Boston)
-mod_step_aic &lt;- step(mod_start, scope=crim ~ zn + indus + chas + nox + rm + age + dis + rad + tax + ptratio + lstat + medv, direction = &#39;both&#39;)</code></pre>
+mod_stepwise_aic &lt;- step(mod_start, scope=crim ~ zn + indus + chas + nox + rm + age + dis + rad + tax + ptratio + lstat + medv, direction = &#39;both&#39;)</code></pre>
 <pre><code>## Start:  AIC=2178.76
 ## crim ~ 1
 ## 
@@ -2703,7 +2702,7 @@ mod_step_aic &lt;- step(mod_start, scope=crim ~ zn + indus + chas + nox + rm + a
 ## - medv     1     238.5 21597 1907.4
 ## - rad      1    7589.6 28948 2055.7</code></pre>
 <pre class="r"><code>n &lt;- nrow(Boston)
-mod_step_bic &lt;- step(mod_start, scope=crim ~ zn + indus + chas + nox + rm + age + dis + rad + tax + ptratio + lstat + medv, direction = &#39;both&#39;, k=log(n))</code></pre>
+mod_stepwise_bic &lt;- step(mod_start, scope=crim ~ zn + indus + chas + nox + rm + age + dis + rad + tax + ptratio + lstat + medv, direction = &#39;both&#39;, k=log(n))</code></pre>
 <pre><code>## Start:  AIC=2182.99
 ## crim ~ 1
 ## 
@@ -2757,15 +2756,15 @@ mod_step_bic &lt;- step(mod_start, scope=crim ~ zn + indus + chas + nox + rm + a
 ## + age      1       3.3 21638 1925.3
 ## - lstat    1    1103.7 22745 1938.1
 ## - rad      1    7966.0 29607 2071.5</code></pre>
-<pre class="r"><code>print(coef(mod_step_aic))</code></pre>
+<pre class="r"><code>print(coef(mod_stepwise_aic))</code></pre>
 <pre><code>## (Intercept)         rad       lstat        medv     ptratio 
 ##   4.9361233   0.5475773   0.1435044  -0.1198319  -0.3070764</code></pre>
-<pre class="r"><code>print(coef(mod_step_bic))</code></pre>
+<pre class="r"><code>print(coef(mod_stepwise_bic))</code></pre>
 <pre><code>## (Intercept)         rad       lstat 
 ##  -4.3814053   0.5228128   0.2372846</code></pre>
 <pre class="r"><code>quality_criterion &lt;- c(&#39;AIC&#39;, &#39;BIC&#39;)
 variables &lt;- c(&#39;rad,lstat,medv,ptratio&#39;, &#39;rad,lstat&#39;)
-criterion_values &lt;- c(extractAIC(mod_step_aic)[2], extractAIC(mod_step_bic, k=log(n))[2])
+criterion_values &lt;- c(extractAIC(mod_stepwise_aic)[2], extractAIC(mod_stepwise_bic, k=log(n))[2])
 data.frame(quality_criterion, variables, criterion_values)</code></pre>
 <div data-pagedtable="false">
 <script data-pagedtable-source type="application/json">
@@ -2827,17 +2826,18 @@ frame &lt;- data.frame(ModelNames, LOOCV)
 frame</code></pre>
 <div data-pagedtable="false">
 <script data-pagedtable-source type="application/json">
-{"columns":[{"label":["ModelNames"],"name":[1],"type":["chr"],"align":["left"]},{"label":["LOOCV"],"name":[2],"type":["dbl"],"align":["right"]}],"data":[{"1":"partone_aic","2":"6.4972675"},{"1":"partone_bic","2":"6.5328802"},{"1":"parttwo_aic","2":"0.7368960"},{"1":"parttwo_bic","2":"0.7381178"},{"1":"partthree_aic","2":"0.7368960"},{"1":"partthree_bic","2":"0.7381178"},{"1":"part_four_rsq","2":"6.5328912"},{"1":"partfour_aic","2":"6.6010463"},{"1":"partfour_bic","2":"6.5094032"}],"options":{"columns":{"min":{},"max":[10]},"rows":{"min":[10],"max":[10]},"pages":{}}}
+{"columns":[{"label":["ModelNames"],"name":[1],"type":["chr"],"align":["left"]},{"label":["LOOCV"],"name":[2],"type":["dbl"],"align":["right"]}],"data":[{"1":"partone_aic","2":"6.576221"},{"1":"partone_bic","2":"6.601046"},{"1":"parttwo_aic","2":"6.497268"},{"1":"parttwo_bic","2":"6.532880"},{"1":"partthree_aic","2":"6.576221"},{"1":"partthree_bic","2":"6.601046"},{"1":"part_four_rsq","2":"6.532891"},{"1":"partfour_aic","2":"6.601046"},{"1":"partfour_bic","2":"6.509403"}],"options":{"columns":{"min":{},"max":[10]},"rows":{"min":[10],"max":[10]},"pages":{}}}
   </script>
 </div>
 <pre class="r"><code>print(frame$ModelNames[which.min(frame$LOOCV)])</code></pre>
 <pre><code>## [1] &quot;parttwo_aic&quot;</code></pre>
 <pre class="r"><code>print(min(frame$LOOCV))</code></pre>
-<pre><code>## [1] 0.736896</code></pre>
+<pre><code>## [1] 6.497268</code></pre>
 <p><strong>Answer:</strong> The LOOCV values for each model are reported
 in the data frame above. The model we prefer is the model with the
-lowest LOOCV value which is the AIC model from part 2, and the AIC model
-from part 3 which both have predictors chosen of “……</p></li>
+lowest LOOCV value which is the AIC model from part 2 which has
+predictors chosen of “zn”, “nox”, “dis”, “rad”, “ptratio”, “lstat”, and
+“medv”.</p></li>
 </ol>
 </div>
 <div id="exercise-3-post-selection-inference-and-data-splitting-20-points" class="section level2">
@@ -2876,16 +2876,153 @@ relationship between <code>noise</code> and any of the predictors.</p>
 <ol style="list-style-type: decimal">
 <li><p>(6 points) Identify the best model using AIC and backward
 selection based on the data in <code>prostate_fake_train.csv</code>.
-Report the subset of the variables chosen by this method.</p></li>
+Report the subset of the variables chosen by this method.</p>
+<pre class="r"><code>train_data &lt;- read.csv(&#39;prostate_fake_train.csv&#39;)
+mod_start &lt;- lm(noise ~ ., data=train_data)
+mod_back_aic &lt;- step(mod_start, direction = &#39;backward&#39;)</code></pre>
+<pre><code>## Start:  AIC=-52.07
+## noise ~ lcavol + lweight + age + lbph + svi + lcp + gleason + 
+##     pgg45
+## 
+##           Df Sum of Sq    RSS     AIC
+## - lcavol   1   0.01129 11.737 -54.023
+## - lbph     1   0.03342 11.759 -53.931
+## - svi      1   0.10170 11.828 -53.647
+## - lcp      1   0.14823 11.874 -53.455
+## - age      1   0.15526 11.881 -53.426
+## &lt;none&gt;                 11.726 -52.070
+## - lweight  1   0.63579 12.362 -51.483
+## - gleason  1   1.63336 13.359 -47.680
+## - pgg45    1   2.26554 13.992 -45.415
+## 
+## Step:  AIC=-54.02
+## noise ~ lweight + age + lbph + svi + lcp + gleason + pgg45
+## 
+##           Df Sum of Sq    RSS     AIC
+## - lbph     1   0.04001 11.777 -55.857
+## - svi      1   0.12596 11.863 -55.500
+## - lcp      1   0.13695 11.874 -55.455
+## - age      1   0.16143 11.899 -55.354
+## &lt;none&gt;                 11.737 -54.023
+## - lweight  1   0.73645 12.474 -53.041
+## - gleason  1   1.70302 13.440 -49.384
+## - pgg45    1   2.26081 13.998 -47.392
+## 
+## Step:  AIC=-55.86
+## noise ~ lweight + age + svi + lcp + gleason + pgg45
+## 
+##           Df Sum of Sq    RSS     AIC
+## - lcp      1   0.13186 11.909 -57.311
+## - svi      1   0.13496 11.912 -57.298
+## - age      1   0.18079 11.958 -57.110
+## &lt;none&gt;                 11.777 -55.857
+## - lweight  1   0.72303 12.500 -54.937
+## - gleason  1   1.68323 13.461 -51.311
+## - pgg45    1   2.22327 14.001 -49.383
+## 
+## Step:  AIC=-57.31
+## noise ~ lweight + age + svi + gleason + pgg45
+## 
+##           Df Sum of Sq    RSS     AIC
+## - svi      1   0.04735 11.957 -59.117
+## - age      1   0.11571 12.025 -58.837
+## &lt;none&gt;                 11.909 -57.311
+## - lweight  1   0.62381 12.533 -56.809
+## - pgg45    1   2.09927 14.008 -51.356
+## - gleason  1   2.19225 14.101 -51.032
+## 
+## Step:  AIC=-59.12
+## noise ~ lweight + age + gleason + pgg45
+## 
+##           Df Sum of Sq    RSS     AIC
+## - age      1   0.14110 12.098 -60.542
+## &lt;none&gt;                 11.957 -59.117
+## - lweight  1   0.77575 12.732 -58.036
+## - gleason  1   2.17252 14.129 -52.936
+## - pgg45    1   2.49167 14.448 -51.841
+## 
+## Step:  AIC=-60.54
+## noise ~ lweight + gleason + pgg45
+## 
+##           Df Sum of Sq    RSS     AIC
+## &lt;none&gt;                 12.098 -60.542
+## - lweight  1   0.66979 12.767 -59.901
+## - gleason  1   2.41864 14.516 -53.611
+## - pgg45    1   2.46213 14.560 -53.464</code></pre>
+<pre class="r"><code>mod_back_aic$coefficients</code></pre>
+<pre><code>## (Intercept)     lweight     gleason       pgg45 
+## -1.74783020 -0.27382468  0.45676205 -0.01312037</code></pre>
+<p><strong>Answer:</strong> The best model using AIC and backward
+selection is the model which uses “lweight”, “gleason”, and “pgg48” as
+predictors.</p></li>
 <li><p>(7 points) Using your model from part 1, perform a <span class="math inline">\(t\)</span>-test at the <span class="math inline">\(\alpha = 0.05\)</span> significance level for each
 predictor. Report the predictors that are significant according to this
-test. Should we trust the results of this test? Why or why not?</p></li>
+test. Should we trust the results of this test? Why or why not?</p>
+<pre class="r"><code>train_data &lt;- read.csv(&#39;prostate_fake_train.csv&#39;)
+model &lt;- lm(noise ~ lweight + gleason + pgg45, data=train_data)
+summary(model)</code></pre>
+<pre><code>## 
+## Call:
+## lm(formula = noise ~ lweight + gleason + pgg45, data = train_data)
+## 
+## Residuals:
+##     Min      1Q  Median      3Q     Max 
+## -0.8305 -0.4107  0.0453  0.3612  1.1647 
+## 
+## Coefficients:
+##              Estimate Std. Error t value Pr(&gt;|t|)   
+## (Intercept) -1.747830   1.190764  -1.468  0.14911   
+## lweight     -0.273825   0.173479  -1.578  0.12147   
+## gleason      0.456762   0.152282   2.999  0.00440 **
+## pgg45       -0.013120   0.004335  -3.026  0.00408 **
+## ---
+## Signif. codes:  0 &#39;***&#39; 0.001 &#39;**&#39; 0.01 &#39;*&#39; 0.05 &#39;.&#39; 0.1 &#39; &#39; 1
+## 
+## Residual standard error: 0.5185 on 45 degrees of freedom
+## Multiple R-squared:  0.2341, Adjusted R-squared:  0.183 
+## F-statistic: 4.585 on 3 and 45 DF,  p-value: 0.00695</code></pre>
+<p><strong>Answer:</strong> If we use a significance level of 0.05, the
+predictors that are significant according to this test are “gleason” and
+“pgg45” because their p-values are less than 0.05. The results found
+have been trained on a certain section of data and we are looking at the
+p-values of that very data. We don’t know how this model will work
+against unseen data, so we can trust that the data we are seeing is
+accurate for the data we tested it on, but cannot say that we trust that
+unseen data will behave this same way.</p></li>
 <li><p>(7 points) Using the predictors you selected in part 1, fit a
 multiple linear regression model on the data in
 <code>prostate_fake_test.csv</code>. Perform a <span class="math inline">\(t\)</span>-test at the <span class="math inline">\(\alpha = 0.05\)</span> significance level for each
 predictor. Report the predictors that are significant according to this
 test. Do the results match the results from part 2? Should we trust
-these results? Why or why not?</p></li>
+these results? Why or why not?</p>
+<pre class="r"><code>test_data &lt;- read.csv(&#39;prostate_fake_test.csv&#39;)
+model &lt;- lm(noise ~ lweight + gleason + pgg45, data=test_data)
+summary(model)</code></pre>
+<pre><code>## 
+## Call:
+## lm(formula = noise ~ lweight + gleason + pgg45, data = test_data)
+## 
+## Residuals:
+##     Min      1Q  Median      3Q     Max 
+## -1.2342 -0.5276 -0.1722  0.6073  1.0393 
+## 
+## Coefficients:
+##              Estimate Std. Error t value Pr(&gt;|t|)
+## (Intercept) -1.510717   1.551436  -0.974    0.336
+## lweight      0.235278   0.174727   1.347    0.185
+## gleason      0.095962   0.225074   0.426    0.672
+## pgg45       -0.004486   0.004844  -0.926    0.359
+## 
+## Residual standard error: 0.6528 on 44 degrees of freedom
+## Multiple R-squared:  0.05677,    Adjusted R-squared:  -0.007542 
+## F-statistic: 0.8827 on 3 and 44 DF,  p-value: 0.4574</code></pre>
+<p><strong>Answer:</strong> There are no predictors that are significant
+in this test and the results do not match the results found in part 2.
+Going along with our explanation in part 2, we are now seeing that the
+model, in fact, did not respond well with unseen data. We can “trust”
+that the values we are seeing are correct for the given data it has been
+tested on, but cannot say these numbers will be true for other subsets
+of data.</p></li>
 </ol>
 </div>
 

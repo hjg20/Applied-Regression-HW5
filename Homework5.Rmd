@@ -2,9 +2,9 @@
 title: 'STA 5207: Homework 5'
 date: 'Due: Friday, February 23 by 11:59 PM'
 output:
+  pdf_document: default
   html_document:
     df_print: paged
-  pdf_document: default
 ---
 
 ```{r setup, include=FALSE}
@@ -132,7 +132,7 @@ In the following exercises, use `lpsa` as the response and the other variables a
     print(min(frame$LOOCV))
     ```
 
-    **Answer:** The LOOCV values for each model are reported in the data frame above. The model we prefer is the model with the lowest LOOCV value which is the AIC model from part 1 which has predictors chosen of "lcavol", "lweight", "svi", "lbph", and "age".
+    **Answer:** The LOOCV values for each model are reported in the data frame above. The models we prefer are the models with the lowest LOOCV value which is the AIC model from part 1, the AIC model from part 2, the AIC model from part 3, and the AIC model from part 4 which all have predictors chosen of "lcavol", "lweight", "svi", "lbph", and "age".
 
 ## Exercise 2 (`Boston` Housing Data) [40 points]
 
@@ -161,9 +161,9 @@ For this exercise we will use the `Boston` data set from the `ISLR2` package. Yo
     ```{r}
     data(Boston, package='ISLR2')
     mod_start <- lm(crim ~ ., data=Boston)
-    mod_forwd_aic <- step(mod_start, direction = 'backward')
+    mod_back_aic <- step(mod_start, direction = 'backward')
     n <- nrow(Boston)
-    mod_forwd_bic <- step(mod_start, direction = 'backward', k=log(n))
+    mod_back_bic <- step(mod_start, direction = 'backward', k=log(n))
     print(coef(mod_forwd_aic))
     print(coef(mod_forwd_bic))
     quality_criterion <- c('AIC', 'BIC')
@@ -179,14 +179,14 @@ For this exercise we will use the `Boston` data set from the `ISLR2` package. Yo
     ```{r}
     data(Boston, package='ISLR2')
     mod_start <- lm(crim ~ 1, data=Boston)
-    mod_step_aic <- step(mod_start, scope=crim ~ zn + indus + chas + nox + rm + age + dis + rad + tax + ptratio + lstat + medv, direction = 'both')
+    mod_stepwise_aic <- step(mod_start, scope=crim ~ zn + indus + chas + nox + rm + age + dis + rad + tax + ptratio + lstat + medv, direction = 'both')
     n <- nrow(Boston)
-    mod_step_bic <- step(mod_start, scope=crim ~ zn + indus + chas + nox + rm + age + dis + rad + tax + ptratio + lstat + medv, direction = 'both', k=log(n))
-    print(coef(mod_step_aic))
-    print(coef(mod_step_bic))
+    mod_stepwise_bic <- step(mod_start, scope=crim ~ zn + indus + chas + nox + rm + age + dis + rad + tax + ptratio + lstat + medv, direction = 'both', k=log(n))
+    print(coef(mod_stepwise_aic))
+    print(coef(mod_stepwise_bic))
     quality_criterion <- c('AIC', 'BIC')
     variables <- c('rad,lstat,medv,ptratio', 'rad,lstat')
-    criterion_values <- c(extractAIC(mod_step_aic)[2], extractAIC(mod_step_bic, k=log(n))[2])
+    criterion_values <- c(extractAIC(mod_stepwise_aic)[2], extractAIC(mod_stepwise_bic, k=log(n))[2])
     data.frame(quality_criterion, variables, criterion_values)
     ```
 
@@ -238,7 +238,7 @@ For this exercise we will use the `Boston` data set from the `ISLR2` package. Yo
     print(min(frame$LOOCV))
     ```
 
-    **Answer:** The LOOCV values for each model are reported in the data frame above. The model we prefer is the model with the lowest LOOCV value which is the AIC model from part 2, and the AIC model from part 3 which both have predictors chosen of “......
+    **Answer:** The LOOCV values for each model are reported in the data frame above. The model we prefer is the model with the lowest LOOCV value which is the AIC model from part 2 which has predictors chosen of “zn", "nox", "dis", "rad", "ptratio", "lstat", and "medv".
 
 ## Exercise 3 (Post-Selection Inference and Data Splitting) [20 points]
 
@@ -271,6 +271,31 @@ For this exercise, use `noise` as the response and the remaining variables as pr
 
 1.  (6 points) Identify the best model using AIC and backward selection based on the data in `prostate_fake_train.csv`. Report the subset of the variables chosen by this method.
 
+    ```{r}
+    train_data <- read.csv('prostate_fake_train.csv')
+    mod_start <- lm(noise ~ ., data=train_data)
+    mod_back_aic <- step(mod_start, direction = 'backward')
+    mod_back_aic$coefficients
+    ```
+
+    **Answer:** The best model using AIC and backward selection is the model which uses "lweight", "gleason", and "pgg48" as predictors.
+
 2.  (7 points) Using your model from part 1, perform a $t$-test at the $\alpha = 0.05$ significance level for each predictor. Report the predictors that are significant according to this test. Should we trust the results of this test? Why or why not?
 
+    ```{r}
+    train_data <- read.csv('prostate_fake_train.csv')
+    model <- lm(noise ~ lweight + gleason + pgg45, data=train_data)
+    summary(model)
+    ```
+
+    **Answer:** If we use a significance level of 0.05, the predictors that are significant according to this test are "gleason" and "pgg45" because their p-values are less than 0.05. The results found have been trained on a certain section of data and we are looking at the p-values of that very data. We don't know how this model will work against unseen data, so we can trust that the data we are seeing is accurate for the data we tested it on, but cannot say that we trust that unseen data will behave this same way.
+
 3.  (7 points) Using the predictors you selected in part 1, fit a multiple linear regression model on the data in `prostate_fake_test.csv`. Perform a $t$-test at the $\alpha = 0.05$ significance level for each predictor. Report the predictors that are significant according to this test. Do the results match the results from part 2? Should we trust these results? Why or why not?
+
+    ```{r}
+    test_data <- read.csv('prostate_fake_test.csv')
+    model <- lm(noise ~ lweight + gleason + pgg45, data=test_data)
+    summary(model)
+    ```
+
+    **Answer:** There are no predictors that are significant in this test and the results do not match the results found in part 2. Going along with our explanation in part 2, we are now seeing that the model, in fact, did not respond well with unseen data. We can "trust" that the values we are seeing are correct for the given data it has been tested on, but cannot say these numbers will be true for other subsets of data.
