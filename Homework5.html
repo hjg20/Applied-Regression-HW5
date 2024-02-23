@@ -1798,7 +1798,7 @@ data.frame(quality_criterion, variables, criterion_values)</code></pre>
 on AIC was the model with predictors “lcavol”, “lweight”, “svi”, “lbph”,
 and “age” with a final AIC of -61.37439. The best model using forward
 selection based on BIC was the model with predictors “lcavol”,
-“lweight”, and “svi” with a final AIC of -50.37736. The table above
+“lweight”, and “svi” with a final BIC of -50.37736. The table above
 shows the quality criterion used, variables selected, and the criterion
 values of each model.</p></li>
 <li><p>(6 points) Identify the best model based on AIC and BIC using
@@ -1946,7 +1946,7 @@ data.frame(quality_criterion, variables, criterion_values)</code></pre>
 based on AIC was the model with predictors “lcavol”, “lweight”, “svi”,
 “lbph”, and “age” with a final AIC of -61.37439. The best model using
 backward selection based on BIC was the model with predictors “lcavol”,
-“lweight”, and “svi” with a final AIC of -50.37736. The table above
+“lweight”, and “svi” with a final BIC of -50.37736. The table above
 shows the quality criterion used, variables selected, and the criterion
 values of each model.</p></li>
 <li><p>(6 points) Identify the best model based on AIC and BIC using
@@ -2113,7 +2113,7 @@ data.frame(quality_criterion, variables, criterion_values)</code></pre>
 based on AIC was the model with predictors “lcavol”, “lweight”, “svi”,
 “lbph”, and “age” with a final AIC of -61.37439. The best model using
 stepwise selection based on BIC was the model with predictors “lcavol”,
-“lweight”, and “svi” with a final AIC of -50.37736. The table above
+“lweight”, and “svi” with a final BIC of -50.37736. The table above
 shows the quality criterion used, variables selected, and the criterion
 values of each model.</p></li>
 <li><p>(12 points) Identify the best model based on <span class="math inline">\(R_a^2\)</span>, AIC, and BIC using best subset
@@ -2126,7 +2126,10 @@ p &lt;- ncol(mod_exhaustive$which)
 mod_aic &lt;- n * log(mod_exhaustive$rss / n) + 2 * (2:p)
 mod_bic &lt;- n * log(mod_exhaustive$rss / n) + log(n) * (2:p)
 bestaic &lt;- mod_exhaustive$which[which.min(mod_aic),]
+bestr2mod &lt;- lm(lpsa~lcavol+lweight+age+lbph+svi+lcp+pgg45, data=prostate)
+bestaicmod &lt;- lm(lpsa~lcavol+lweight+age+lbph+svi, data=prostate)
 bestbic &lt;- mod_exhaustive$which[which.min(mod_bic),]
+bestbicmod &lt;- lm(lpsa~lcavol+lweight+svi, data=prostate)
 quality_criterion &lt;- c(&#39;R2_a&#39;, &#39;AIC&#39;, &#39;BIC&#39;)
 variables_chosen &lt;- c(&#39;lcavol, lweight, age, lbph, svi, lcp, pgg45&#39;, &#39;lcavol, lweight, age, lbph, svi&#39;, &#39;lcavol, lweight, svi&#39;)
 criterion_values &lt;- c(max(mod_exhaustive$adjr2), min(mod_aic), min(mod_bic))
@@ -2148,8 +2151,35 @@ with predictors “lcavol”, “lweight”, and “svi”.</p></li>
 do you prefer based on this criteria?</p>
 <pre class="r"><code>calc_loocv_rmse = function(model) {
   sqrt(mean((resid(model) / (1 - hatvalues(model))) ^ 2))
-}</code></pre>
-<p><strong>Answer:</strong></p></li>
+}
+partone_aic =  calc_loocv_rmse(mod_forwd_aic)
+partone_bic = calc_loocv_rmse(mod_forwd_bic)
+parttwo_aic = calc_loocv_rmse(mod_back_aic)
+parttwo_bic = calc_loocv_rmse(mod_back_bic)
+partthree_aic = calc_loocv_rmse(mod_stepwise_aic)
+partthree_bic = calc_loocv_rmse(mod_stepwise_bic)
+part_four_rsq = calc_loocv_rmse(bestr2mod)
+partfour_aic = calc_loocv_rmse(bestaicmod)
+partfour_bic = calc_loocv_rmse(bestbicmod)
+
+LOOCV &lt;- c(partone_aic, partone_bic, parttwo_aic, parttwo_bic, partthree_aic, partthree_bic, part_four_rsq, partfour_aic, partfour_bic)
+ModelNames &lt;- c(&quot;partone_aic&quot;, &quot;partone_bic&quot;, &quot;parttwo_aic&quot;, &quot;parttwo_bic&quot;, &quot;partthree_aic&quot;, &quot;partthree_bic&quot;, &quot;part_four_rsq&quot;, &quot;partfour_aic&quot;, &quot;partfour_bic&quot;)
+frame &lt;- data.frame(ModelNames, LOOCV)
+frame</code></pre>
+<div data-pagedtable="false">
+<script data-pagedtable-source type="application/json">
+{"columns":[{"label":["ModelNames"],"name":[1],"type":["chr"],"align":["left"]},{"label":["LOOCV"],"name":[2],"type":["dbl"],"align":["right"]}],"data":[{"1":"partone_aic","2":"0.7368960"},{"1":"partone_bic","2":"0.7381178"},{"1":"parttwo_aic","2":"0.7368960"},{"1":"parttwo_bic","2":"0.7381178"},{"1":"partthree_aic","2":"0.7368960"},{"1":"partthree_bic","2":"0.7381178"},{"1":"part_four_rsq","2":"0.7410915"},{"1":"partfour_aic","2":"0.7368960"},{"1":"partfour_bic","2":"0.7381178"}],"options":{"columns":{"min":{},"max":[10]},"rows":{"min":[10],"max":[10]},"pages":{}}}
+  </script>
+</div>
+<pre class="r"><code>print(frame$ModelNames[which.min(frame$LOOCV)])</code></pre>
+<pre><code>## [1] &quot;partone_aic&quot;</code></pre>
+<pre class="r"><code>print(min(frame$LOOCV))</code></pre>
+<pre><code>## [1] 0.736896</code></pre>
+<p><strong>Answer:</strong> The LOOCV values for each model are reported
+in the data frame above. The model we prefer is the model with the
+lowest LOOCV value which is the AIC model from part 1 which has
+predictors chosen of “lcavol”, “lweight”, “svi”, “lbph”, and
+“age”.</p></li>
 </ol>
 </div>
 <div id="exercise-2-boston-housing-data-40-points" class="section level2">
@@ -2165,21 +2195,649 @@ the other variables as predictors.</p>
 <ol style="list-style-type: decimal">
 <li><p>(6 points) Identify the best model based on AIC and BIC using
 forward selection. Create a table listing each quality criterion (AIC,
-BIC) and the subset of variables chosen by the method.</p></li>
+BIC) and the subset of variables chosen by the method.</p>
+<pre class="r"><code>data(Boston, package=&#39;ISLR2&#39;)
+mod_start &lt;- lm(crim ~ 1, data=Boston)
+mod_forwd_aic &lt;- step(mod_start, scope=crim ~ zn + indus + chas + nox + rm + age + dis + rad + tax + ptratio + lstat + medv, direction = &#39;forward&#39;)</code></pre>
+<pre><code>## Start:  AIC=2178.76
+## crim ~ 1
+## 
+##           Df Sum of Sq   RSS    AIC
+## + rad      1   14618.6 22745 1929.6
+## + tax      1   12689.1 24674 1970.8
+## + lstat    1    7756.3 29607 2063.0
+## + nox      1    6621.4 30742 2082.1
+## + indus    1    6176.5 31187 2089.3
+## + medv     1    5633.6 31730 2098.1
+## + dis      1    5385.9 31977 2102.0
+## + age      1    4648.8 32714 2113.5
+## + ptratio  1    3141.1 34222 2136.3
+## + rm       1    1796.0 35567 2155.8
+## + zn       1    1501.5 35862 2160.0
+## &lt;none&gt;                 37363 2178.8
+## + chas     1     116.7 37247 2179.2
+## 
+## Step:  AIC=1929.61
+## crim ~ rad
+## 
+##           Df Sum of Sq   RSS    AIC
+## + lstat    1   1103.70 21641 1906.4
+## + medv     1    978.68 21766 1909.3
+## + rm       1    302.58 22442 1924.8
+## + dis      1    244.47 22500 1926.1
+## + age      1    214.87 22530 1926.8
+## + chas     1     98.27 22646 1929.4
+## &lt;none&gt;                 22745 1929.6
+## + nox      1     88.51 22656 1929.6
+## + indus    1     68.17 22676 1930.1
+## + tax      1     39.19 22705 1930.7
+## + zn       1      1.18 22743 1931.6
+## + ptratio  1      0.03 22745 1931.6
+## 
+## Step:  AIC=1906.44
+## crim ~ rad + lstat
+## 
+##           Df Sum of Sq   RSS    AIC
+## + medv     1   138.075 21503 1905.2
+## + zn       1    97.116 21544 1906.2
+## &lt;none&gt;                 21641 1906.4
+## + chas     1    64.158 21577 1906.9
+## + indus    1    53.955 21587 1907.2
+## + ptratio  1    43.610 21597 1907.4
+## + nox      1    26.311 21615 1907.8
+## + dis      1    22.336 21619 1907.9
+## + rm       1     9.883 21631 1908.2
+## + tax      1     8.847 21632 1908.2
+## + age      1     3.274 21638 1908.4
+## 
+## Step:  AIC=1905.2
+## crim ~ rad + lstat + medv
+## 
+##           Df Sum of Sq   RSS    AIC
+## + ptratio  1   144.049 21359 1903.8
+## + zn       1   119.115 21384 1904.4
+## + rm       1    94.196 21409 1905.0
+## &lt;none&gt;                 21503 1905.2
+## + indus    1    65.402 21437 1905.7
+## + dis      1    56.999 21446 1905.9
+## + chas     1    33.130 21470 1906.4
+## + tax      1    27.264 21476 1906.6
+## + nox      1    22.157 21481 1906.7
+## + age      1     0.040 21503 1907.2
+## 
+## Step:  AIC=1903.8
+## crim ~ rad + lstat + medv + ptratio
+## 
+##         Df Sum of Sq   RSS    AIC
+## &lt;none&gt;               21359 1903.8
+## + rm     1    79.092 21280 1903.9
+## + zn     1    69.140 21290 1904.2
+## + nox    1    63.002 21296 1904.3
+## + dis    1    61.114 21298 1904.3
+## + indus  1    55.393 21303 1904.5
+## + chas   1    40.935 21318 1904.8
+## + tax    1    29.551 21329 1905.1
+## + age    1     0.001 21359 1905.8</code></pre>
+<pre class="r"><code>n &lt;- nrow(Boston)
+mod_forwd_bic &lt;- step(mod_start, scope=crim ~ zn + indus + chas + nox + rm + age + dis + rad + tax + ptratio + lstat + medv, direction = &#39;forward&#39;, k=log(n))</code></pre>
+<pre><code>## Start:  AIC=2182.99
+## crim ~ 1
+## 
+##           Df Sum of Sq   RSS    AIC
+## + rad      1   14618.6 22745 1938.1
+## + tax      1   12689.1 24674 1979.3
+## + lstat    1    7756.3 29607 2071.5
+## + nox      1    6621.4 30742 2090.5
+## + indus    1    6176.5 31187 2097.8
+## + medv     1    5633.6 31730 2106.5
+## + dis      1    5385.9 31977 2110.4
+## + age      1    4648.8 32714 2122.0
+## + ptratio  1    3141.1 34222 2144.8
+## + rm       1    1796.0 35567 2164.3
+## + zn       1    1501.5 35862 2168.5
+## &lt;none&gt;                 37363 2183.0
+## + chas     1     116.7 37247 2187.6
+## 
+## Step:  AIC=1938.06
+## crim ~ rad
+## 
+##           Df Sum of Sq   RSS    AIC
+## + lstat    1   1103.70 21641 1919.1
+## + medv     1    978.68 21766 1922.0
+## + rm       1    302.58 22442 1937.5
+## &lt;none&gt;                 22745 1938.1
+## + dis      1    244.47 22500 1938.8
+## + age      1    214.87 22530 1939.5
+## + chas     1     98.27 22646 1942.1
+## + nox      1     88.51 22656 1942.3
+## + indus    1     68.17 22676 1942.8
+## + tax      1     39.19 22705 1943.4
+## + zn       1      1.18 22743 1944.3
+## + ptratio  1      0.03 22745 1944.3
+## 
+## Step:  AIC=1919.12
+## crim ~ rad + lstat
+## 
+##           Df Sum of Sq   RSS    AIC
+## &lt;none&gt;                 21641 1919.1
+## + medv     1   138.075 21503 1922.1
+## + zn       1    97.116 21544 1923.1
+## + chas     1    64.158 21577 1923.8
+## + indus    1    53.955 21587 1924.1
+## + ptratio  1    43.610 21597 1924.3
+## + nox      1    26.311 21615 1924.7
+## + dis      1    22.336 21619 1924.8
+## + rm       1     9.883 21631 1925.1
+## + tax      1     8.847 21632 1925.1
+## + age      1     3.274 21638 1925.3</code></pre>
+<pre class="r"><code>print(coef(mod_forwd_aic))</code></pre>
+<pre><code>## (Intercept)         rad       lstat        medv     ptratio 
+##   4.9361233   0.5475773   0.1435044  -0.1198319  -0.3070764</code></pre>
+<pre class="r"><code>print(coef(mod_forwd_bic))</code></pre>
+<pre><code>## (Intercept)         rad       lstat 
+##  -4.3814053   0.5228128   0.2372846</code></pre>
+<pre class="r"><code>quality_criterion &lt;- c(&#39;AIC&#39;, &#39;BIC&#39;)
+variables &lt;- c(&#39;rad,lstat,medv,ptratio&#39;, &#39;rad,lstat&#39;)
+criterion_values &lt;- c(extractAIC(mod_forwd_aic)[2], extractAIC(mod_forwd_bic, k=log(n))[2])
+data.frame(quality_criterion, variables, criterion_values)</code></pre>
+<div data-pagedtable="false">
+<script data-pagedtable-source type="application/json">
+{"columns":[{"label":["quality_criterion"],"name":[1],"type":["chr"],"align":["left"]},{"label":["variables"],"name":[2],"type":["chr"],"align":["left"]},{"label":["criterion_values"],"name":[3],"type":["dbl"],"align":["right"]}],"data":[{"1":"AIC","2":"rad,lstat,medv,ptratio","3":"1903.797"},{"1":"BIC","2":"rad,lstat","3":"1919.116"}],"options":{"columns":{"min":{},"max":[10]},"rows":{"min":[10],"max":[10]},"pages":{}}}
+  </script>
+</div>
+<p><strong>Answer:</strong> The best model using forward selection based
+on AIC was the model with predictors “rad”, “lstat”, “medv”, and
+“ptratio” with a final AIC of 1903.797. The best model using forward
+selection based on BIC was the model with predictors “rad and “lstat”
+with a final BIC of 1919.116. The table above shows the quality
+criterion used, variables selected, and the criterion values of each
+model.</p></li>
 <li><p>(6 points) Identify the best model based on AIC and BIC using
 backward selection. Create a table listing each quality criterion (AIC,
-BIC) and the subset of variables chosen by the method.</p></li>
+BIC) and the subset of variables chosen by the method.</p>
+<pre class="r"><code>data(Boston, package=&#39;ISLR2&#39;)
+mod_start &lt;- lm(crim ~ ., data=Boston)
+mod_forwd_aic &lt;- step(mod_start, direction = &#39;backward&#39;)</code></pre>
+<pre><code>## Start:  AIC=1900.87
+## crim ~ zn + indus + chas + nox + rm + age + dis + rad + tax + 
+##     ptratio + lstat + medv
+## 
+##           Df Sum of Sq   RSS    AIC
+## - age      1      0.09 20575 1898.9
+## - chas     1     20.30 20595 1899.4
+## - indus    1     20.31 20595 1899.4
+## - tax      1     22.24 20597 1899.4
+## - rm       1     44.79 20619 1900.0
+## &lt;none&gt;                 20574 1900.9
+## - ptratio  1    111.10 20686 1901.6
+## - lstat    1    140.23 20715 1902.3
+## - nox      1    147.88 20722 1902.5
+## - zn       1    246.97 20822 1904.9
+## - dis      1    535.94 21110 1911.9
+## - medv     1    564.68 21139 1912.6
+## - rad      1   2043.03 22618 1946.8
+## 
+## Step:  AIC=1898.87
+## crim ~ zn + indus + chas + nox + rm + dis + rad + tax + ptratio + 
+##     lstat + medv
+## 
+##           Df Sum of Sq   RSS    AIC
+## - indus    1     20.31 20595 1897.4
+## - chas     1     20.50 20595 1897.4
+## - tax      1     22.34 20597 1897.4
+## - rm       1     45.57 20620 1898.0
+## &lt;none&gt;                 20575 1898.9
+## - ptratio  1    112.36 20687 1899.6
+## - lstat    1    152.46 20727 1900.6
+## - nox      1    160.61 20735 1900.8
+## - zn       1    251.86 20826 1903.0
+## - medv     1    564.95 21140 1910.6
+## - dis      1    576.47 21151 1910.8
+## - rad      1   2060.74 22635 1945.2
+## 
+## Step:  AIC=1897.37
+## crim ~ zn + chas + nox + rm + dis + rad + tax + ptratio + lstat + 
+##     medv
+## 
+##           Df Sum of Sq   RSS    AIC
+## - chas     1     25.04 20620 1896.0
+## - rm       1     51.61 20646 1896.6
+## - tax      1     55.48 20650 1896.7
+## &lt;none&gt;                 20595 1897.4
+## - ptratio  1    127.12 20722 1898.5
+## - lstat    1    144.65 20740 1898.9
+## - nox      1    209.68 20805 1900.5
+## - zn       1    271.51 20866 1902.0
+## - dis      1    556.28 21151 1908.9
+## - medv     1    568.32 21163 1909.1
+## - rad      1   2397.21 22992 1951.1
+## 
+## Step:  AIC=1895.98
+## crim ~ zn + nox + rm + dis + rad + tax + ptratio + lstat + medv
+## 
+##           Df Sum of Sq   RSS    AIC
+## - tax      1     51.38 20671 1895.2
+## - rm       1     53.90 20674 1895.3
+## &lt;none&gt;                 20620 1896.0
+## - ptratio  1    124.52 20744 1897.0
+## - lstat    1    141.65 20762 1897.5
+## - nox      1    229.05 20849 1899.6
+## - zn       1    276.43 20896 1900.7
+## - dis      1    556.72 21177 1907.5
+## - medv     1    621.23 21241 1909.0
+## - rad      1   2383.04 23003 1949.3
+## 
+## Step:  AIC=1895.24
+## crim ~ zn + nox + rm + dis + rad + ptratio + lstat + medv
+## 
+##           Df Sum of Sq   RSS    AIC
+## - rm       1      59.6 20731 1894.7
+## &lt;none&gt;                 20671 1895.2
+## - ptratio  1     142.2 20814 1896.7
+## - lstat    1     149.6 20821 1896.9
+## - zn       1     238.9 20910 1899.1
+## - nox      1     285.4 20957 1900.2
+## - dis      1     521.0 21192 1905.8
+## - medv     1     579.4 21251 1907.2
+## - rad      1    5413.8 26085 2011.0
+## 
+## Step:  AIC=1894.7
+## crim ~ zn + nox + dis + rad + ptratio + lstat + medv
+## 
+##           Df Sum of Sq   RSS    AIC
+## &lt;none&gt;                 20731 1894.7
+## - lstat    1     113.7 20845 1895.5
+## - ptratio  1     149.9 20881 1896.3
+## - zn       1     259.0 20990 1899.0
+## - nox      1     283.2 21014 1899.6
+## - medv     1     522.7 21254 1905.3
+## - dis      1     535.9 21267 1905.6
+## - rad      1    5666.7 26398 2015.0</code></pre>
+<pre class="r"><code>n &lt;- nrow(Boston)
+mod_forwd_bic &lt;- step(mod_start, direction = &#39;backward&#39;, k=log(n))</code></pre>
+<pre><code>## Start:  AIC=1955.81
+## crim ~ zn + indus + chas + nox + rm + age + dis + rad + tax + 
+##     ptratio + lstat + medv
+## 
+##           Df Sum of Sq   RSS    AIC
+## - age      1      0.09 20575 1949.6
+## - chas     1     20.30 20595 1950.1
+## - indus    1     20.31 20595 1950.1
+## - tax      1     22.24 20597 1950.1
+## - rm       1     44.79 20619 1950.7
+## - ptratio  1    111.10 20686 1952.3
+## - lstat    1    140.23 20715 1953.0
+## - nox      1    147.88 20722 1953.2
+## - zn       1    246.97 20822 1955.6
+## &lt;none&gt;                 20574 1955.8
+## - dis      1    535.94 21110 1962.6
+## - medv     1    564.68 21139 1963.3
+## - rad      1   2043.03 22618 1997.5
+## 
+## Step:  AIC=1949.59
+## crim ~ zn + indus + chas + nox + rm + dis + rad + tax + ptratio + 
+##     lstat + medv
+## 
+##           Df Sum of Sq   RSS    AIC
+## - indus    1     20.31 20595 1943.9
+## - chas     1     20.50 20595 1943.9
+## - tax      1     22.34 20597 1943.9
+## - rm       1     45.57 20620 1944.5
+## - ptratio  1    112.36 20687 1946.1
+## - lstat    1    152.46 20727 1947.1
+## - nox      1    160.61 20735 1947.3
+## - zn       1    251.86 20826 1949.5
+## &lt;none&gt;                 20575 1949.6
+## - medv     1    564.95 21140 1957.1
+## - dis      1    576.47 21151 1957.3
+## - rad      1   2060.74 22635 1991.7
+## 
+## Step:  AIC=1943.86
+## crim ~ zn + chas + nox + rm + dis + rad + tax + ptratio + lstat + 
+##     medv
+## 
+##           Df Sum of Sq   RSS    AIC
+## - chas     1     25.04 20620 1938.2
+## - rm       1     51.61 20646 1938.9
+## - tax      1     55.48 20650 1939.0
+## - ptratio  1    127.12 20722 1940.8
+## - lstat    1    144.65 20740 1941.2
+## - nox      1    209.68 20805 1942.8
+## &lt;none&gt;                 20595 1943.9
+## - zn       1    271.51 20866 1944.3
+## - dis      1    556.28 21151 1951.1
+## - medv     1    568.32 21163 1951.4
+## - rad      1   2397.21 22992 1993.3
+## 
+## Step:  AIC=1938.25
+## crim ~ zn + nox + rm + dis + rad + tax + ptratio + lstat + medv
+## 
+##           Df Sum of Sq   RSS    AIC
+## - tax      1     51.38 20671 1933.3
+## - rm       1     53.90 20674 1933.3
+## - ptratio  1    124.52 20744 1935.1
+## - lstat    1    141.65 20762 1935.5
+## - nox      1    229.05 20849 1937.6
+## &lt;none&gt;                 20620 1938.2
+## - zn       1    276.43 20896 1938.8
+## - dis      1    556.72 21177 1945.5
+## - medv     1    621.23 21241 1947.0
+## - rad      1   2383.04 23003 1987.4
+## 
+## Step:  AIC=1933.28
+## crim ~ zn + nox + rm + dis + rad + ptratio + lstat + medv
+## 
+##           Df Sum of Sq   RSS    AIC
+## - rm       1      59.6 20731 1928.5
+## - ptratio  1     142.2 20814 1930.5
+## - lstat    1     149.6 20821 1930.7
+## - zn       1     238.9 20910 1932.9
+## &lt;none&gt;                 20671 1933.3
+## - nox      1     285.4 20957 1934.0
+## - dis      1     521.0 21192 1939.7
+## - medv     1     579.4 21251 1941.0
+## - rad      1    5413.8 26085 2044.8
+## 
+## Step:  AIC=1928.51
+## crim ~ zn + nox + dis + rad + ptratio + lstat + medv
+## 
+##           Df Sum of Sq   RSS    AIC
+## - lstat    1     113.7 20845 1925.0
+## - ptratio  1     149.9 20881 1925.9
+## &lt;none&gt;                 20731 1928.5
+## - zn       1     259.0 20990 1928.6
+## - nox      1     283.2 21014 1929.2
+## - medv     1     522.7 21254 1934.9
+## - dis      1     535.9 21267 1935.2
+## - rad      1    5666.7 26398 2044.6
+## 
+## Step:  AIC=1925.05
+## crim ~ zn + nox + dis + rad + ptratio + medv
+## 
+##           Df Sum of Sq   RSS    AIC
+## - ptratio  1     170.8 21015 1923.0
+## - nox      1     258.1 21103 1925.0
+## &lt;none&gt;                 20845 1925.0
+## - zn       1     279.8 21124 1925.6
+## - dis      1     700.2 21545 1935.5
+## - medv     1    1519.5 22364 1954.4
+## - rad      1    5949.3 26794 2045.9
+## 
+## Step:  AIC=1922.96
+## crim ~ zn + nox + dis + rad + medv
+## 
+##        Df Sum of Sq   RSS    AIC
+## - nox   1     151.2 21167 1920.4
+## &lt;none&gt;              21015 1923.0
+## - zn    1     454.6 21470 1927.6
+## - dis   1     668.8 21684 1932.6
+## - medv  1    1364.0 22379 1948.5
+## - rad   1    6388.2 27404 2051.0
+## 
+## Step:  AIC=1920.36
+## crim ~ zn + dis + rad + medv
+## 
+##        Df Sum of Sq   RSS    AIC
+## &lt;none&gt;              21167 1920.4
+## - zn    1     422.6 21589 1924.1
+## - dis   1     538.2 21705 1926.8
+## - medv  1    1214.7 22381 1942.4
+## - rad   1    6465.2 27632 2049.0</code></pre>
+<pre class="r"><code>print(coef(mod_forwd_aic))</code></pre>
+<pre><code>## (Intercept)          zn         nox         dis         rad     ptratio 
+##  17.4668235   0.0449679 -12.4578238  -0.9425497   0.5615224  -0.3470306 
+##       lstat        medv 
+##   0.1147895  -0.1902559</code></pre>
+<pre class="r"><code>print(coef(mod_forwd_bic))</code></pre>
+<pre><code>## (Intercept)          zn         dis         rad        medv 
+##  5.26547997  0.05486634 -0.72291374  0.50020971 -0.19121698</code></pre>
+<pre class="r"><code>quality_criterion &lt;- c(&#39;AIC&#39;, &#39;BIC&#39;)
+variables &lt;- c(&#39;zn,nox,dis,rad,ptratio,lstat,medv&#39;, &#39;zn,dis,rad,medv&#39;)
+criterion_values &lt;- c(extractAIC(mod_forwd_aic)[2], extractAIC(mod_forwd_bic, k=log(n))[2])
+data.frame(quality_criterion, variables, criterion_values)</code></pre>
+<div data-pagedtable="false">
+<script data-pagedtable-source type="application/json">
+{"columns":[{"label":["quality_criterion"],"name":[1],"type":["chr"],"align":["left"]},{"label":["variables"],"name":[2],"type":["chr"],"align":["left"]},{"label":["criterion_values"],"name":[3],"type":["dbl"],"align":["right"]}],"data":[{"1":"AIC","2":"zn,nox,dis,rad,ptratio,lstat,medv","3":"1894.700"},{"1":"BIC","2":"zn,dis,rad,medv","3":"1920.358"}],"options":{"columns":{"min":{},"max":[10]},"rows":{"min":[10],"max":[10]},"pages":{}}}
+  </script>
+</div>
+<p><strong>Answer:</strong> The best model using backward selection
+based on AIC was the model with predictors “zn”, “nox”, “dis”, “rad”,
+“ptratio”, “lstat” and “medv” with a final AIC of 1894.700. The best
+model using forward selection based on BIC was the model with predictors
+“zn”, “dis”, “rad”, and “medv” with a final BIC of 1920.358. The table
+above shows the quality criterion used, variables selected, and the
+criterion values of each model.</p></li>
 <li><p>(6 points) Identify the best model based on AIC and BIC using
 stepwise selection. Create a table listing each quality criterion (AIC,
-BIC) and the subset of variables chosen by the method.</p></li>
+BIC) and the subset of variables chosen by the method.</p>
+<pre class="r"><code>data(Boston, package=&#39;ISLR2&#39;)
+mod_start &lt;- lm(crim ~ 1, data=Boston)
+mod_step_aic &lt;- step(mod_start, scope=crim ~ zn + indus + chas + nox + rm + age + dis + rad + tax + ptratio + lstat + medv, direction = &#39;both&#39;)</code></pre>
+<pre><code>## Start:  AIC=2178.76
+## crim ~ 1
+## 
+##           Df Sum of Sq   RSS    AIC
+## + rad      1   14618.6 22745 1929.6
+## + tax      1   12689.1 24674 1970.8
+## + lstat    1    7756.3 29607 2063.0
+## + nox      1    6621.4 30742 2082.1
+## + indus    1    6176.5 31187 2089.3
+## + medv     1    5633.6 31730 2098.1
+## + dis      1    5385.9 31977 2102.0
+## + age      1    4648.8 32714 2113.5
+## + ptratio  1    3141.1 34222 2136.3
+## + rm       1    1796.0 35567 2155.8
+## + zn       1    1501.5 35862 2160.0
+## &lt;none&gt;                 37363 2178.8
+## + chas     1     116.7 37247 2179.2
+## 
+## Step:  AIC=1929.61
+## crim ~ rad
+## 
+##           Df Sum of Sq   RSS    AIC
+## + lstat    1    1103.7 21641 1906.4
+## + medv     1     978.7 21766 1909.3
+## + rm       1     302.6 22442 1924.8
+## + dis      1     244.5 22500 1926.1
+## + age      1     214.9 22530 1926.8
+## + chas     1      98.3 22646 1929.4
+## &lt;none&gt;                 22745 1929.6
+## + nox      1      88.5 22656 1929.6
+## + indus    1      68.2 22676 1930.1
+## + tax      1      39.2 22705 1930.7
+## + zn       1       1.2 22743 1931.6
+## + ptratio  1       0.0 22745 1931.6
+## - rad      1   14618.6 37363 2178.8
+## 
+## Step:  AIC=1906.44
+## crim ~ rad + lstat
+## 
+##           Df Sum of Sq   RSS    AIC
+## + medv     1     138.1 21503 1905.2
+## + zn       1      97.1 21544 1906.2
+## &lt;none&gt;                 21641 1906.4
+## + chas     1      64.2 21577 1906.9
+## + indus    1      54.0 21587 1907.2
+## + ptratio  1      43.6 21597 1907.4
+## + nox      1      26.3 21615 1907.8
+## + dis      1      22.3 21619 1907.9
+## + rm       1       9.9 21631 1908.2
+## + tax      1       8.8 21632 1908.2
+## + age      1       3.3 21638 1908.4
+## - lstat    1    1103.7 22745 1929.6
+## - rad      1    7966.0 29607 2063.0
+## 
+## Step:  AIC=1905.2
+## crim ~ rad + lstat + medv
+## 
+##           Df Sum of Sq   RSS    AIC
+## + ptratio  1     144.0 21359 1903.8
+## + zn       1     119.1 21384 1904.4
+## + rm       1      94.2 21409 1905.0
+## &lt;none&gt;                 21503 1905.2
+## + indus    1      65.4 21437 1905.7
+## + dis      1      57.0 21446 1905.9
+## + chas     1      33.1 21470 1906.4
+## - medv     1     138.1 21641 1906.4
+## + tax      1      27.3 21476 1906.6
+## + nox      1      22.2 21481 1906.7
+## + age      1       0.0 21503 1907.2
+## - lstat    1     263.1 21766 1909.3
+## - rad      1    7880.7 29384 2061.2
+## 
+## Step:  AIC=1903.8
+## crim ~ rad + lstat + medv + ptratio
+## 
+##           Df Sum of Sq   RSS    AIC
+## &lt;none&gt;                 21359 1903.8
+## + rm       1      79.1 21280 1903.9
+## + zn       1      69.1 21290 1904.2
+## + nox      1      63.0 21296 1904.3
+## + dis      1      61.1 21298 1904.3
+## + indus    1      55.4 21303 1904.5
+## + chas     1      40.9 21318 1904.8
+## + tax      1      29.6 21329 1905.1
+## - ptratio  1     144.0 21503 1905.2
+## + age      1       0.0 21359 1905.8
+## - lstat    1     211.6 21570 1906.8
+## - medv     1     238.5 21597 1907.4
+## - rad      1    7589.6 28948 2055.7</code></pre>
+<pre class="r"><code>n &lt;- nrow(Boston)
+mod_step_bic &lt;- step(mod_start, scope=crim ~ zn + indus + chas + nox + rm + age + dis + rad + tax + ptratio + lstat + medv, direction = &#39;both&#39;, k=log(n))</code></pre>
+<pre><code>## Start:  AIC=2182.99
+## crim ~ 1
+## 
+##           Df Sum of Sq   RSS    AIC
+## + rad      1   14618.6 22745 1938.1
+## + tax      1   12689.1 24674 1979.3
+## + lstat    1    7756.3 29607 2071.5
+## + nox      1    6621.4 30742 2090.5
+## + indus    1    6176.5 31187 2097.8
+## + medv     1    5633.6 31730 2106.5
+## + dis      1    5385.9 31977 2110.4
+## + age      1    4648.8 32714 2122.0
+## + ptratio  1    3141.1 34222 2144.8
+## + rm       1    1796.0 35567 2164.3
+## + zn       1    1501.5 35862 2168.5
+## &lt;none&gt;                 37363 2183.0
+## + chas     1     116.7 37247 2187.6
+## 
+## Step:  AIC=1938.06
+## crim ~ rad
+## 
+##           Df Sum of Sq   RSS    AIC
+## + lstat    1    1103.7 21641 1919.1
+## + medv     1     978.7 21766 1922.0
+## + rm       1     302.6 22442 1937.5
+## &lt;none&gt;                 22745 1938.1
+## + dis      1     244.5 22500 1938.8
+## + age      1     214.9 22530 1939.5
+## + chas     1      98.3 22646 1942.1
+## + nox      1      88.5 22656 1942.3
+## + indus    1      68.2 22676 1942.8
+## + tax      1      39.2 22705 1943.4
+## + zn       1       1.2 22743 1944.3
+## + ptratio  1       0.0 22745 1944.3
+## - rad      1   14618.6 37363 2183.0
+## 
+## Step:  AIC=1919.12
+## crim ~ rad + lstat
+## 
+##           Df Sum of Sq   RSS    AIC
+## &lt;none&gt;                 21641 1919.1
+## + medv     1     138.1 21503 1922.1
+## + zn       1      97.1 21544 1923.1
+## + chas     1      64.2 21577 1923.8
+## + indus    1      54.0 21587 1924.1
+## + ptratio  1      43.6 21597 1924.3
+## + nox      1      26.3 21615 1924.7
+## + dis      1      22.3 21619 1924.8
+## + rm       1       9.9 21631 1925.1
+## + tax      1       8.8 21632 1925.1
+## + age      1       3.3 21638 1925.3
+## - lstat    1    1103.7 22745 1938.1
+## - rad      1    7966.0 29607 2071.5</code></pre>
+<pre class="r"><code>print(coef(mod_step_aic))</code></pre>
+<pre><code>## (Intercept)         rad       lstat        medv     ptratio 
+##   4.9361233   0.5475773   0.1435044  -0.1198319  -0.3070764</code></pre>
+<pre class="r"><code>print(coef(mod_step_bic))</code></pre>
+<pre><code>## (Intercept)         rad       lstat 
+##  -4.3814053   0.5228128   0.2372846</code></pre>
+<pre class="r"><code>quality_criterion &lt;- c(&#39;AIC&#39;, &#39;BIC&#39;)
+variables &lt;- c(&#39;rad,lstat,medv,ptratio&#39;, &#39;rad,lstat&#39;)
+criterion_values &lt;- c(extractAIC(mod_step_aic)[2], extractAIC(mod_step_bic, k=log(n))[2])
+data.frame(quality_criterion, variables, criterion_values)</code></pre>
+<div data-pagedtable="false">
+<script data-pagedtable-source type="application/json">
+{"columns":[{"label":["quality_criterion"],"name":[1],"type":["chr"],"align":["left"]},{"label":["variables"],"name":[2],"type":["chr"],"align":["left"]},{"label":["criterion_values"],"name":[3],"type":["dbl"],"align":["right"]}],"data":[{"1":"AIC","2":"rad,lstat,medv,ptratio","3":"1903.797"},{"1":"BIC","2":"rad,lstat","3":"1919.116"}],"options":{"columns":{"min":{},"max":[10]},"rows":{"min":[10],"max":[10]},"pages":{}}}
+  </script>
+</div>
+<p><strong>Answer:</strong> The best model using stepwise selection
+based on AIC was the model with predictors “rad”, “lstat”, “medv”, and
+“ptratio” with a final AIC of 1903.797. The best model using forward
+selection based on BIC was the model with predictors “rad and “lstat”
+with a final BIC of 1919.116. The table above shows the quality
+criterion used, variables selected, and the criterion values of each
+model.</p></li>
 <li><p>(12 points) Identify the best model based on <span class="math inline">\(R_a^2\)</span>, AIC, and BIC using best subset
 selection. Note that you have to set <code>nvmax = 12</code> when
 calling <code>regsubsets</code>, since there are 12 predictors. Create a
 table listing each quality criterion (<span class="math inline">\(R_a^2\)</span>, AIC, and BIC) and the subset of
-the variables chosen by the method.</p></li>
+the variables chosen by the method.</p>
+<pre class="r"><code>library(leaps)
+mod_exhaustive = summary(regsubsets(crim ~ ., data=Boston, nvmax = 12))
+bestr2 &lt;- mod_exhaustive$which[which.max(mod_exhaustive$adjr2),]
+p &lt;- ncol(mod_exhaustive$which)
+mod_aic &lt;- n * log(mod_exhaustive$rss / n) + 2 * (2:p)
+mod_bic &lt;- n * log(mod_exhaustive$rss / n) + log(n) * (2:p)
+bestaic &lt;- mod_exhaustive$which[which.min(mod_aic),]
+bestr2mod &lt;- lm(crim~zn+dis+rad+ptratio+lstat+medv, data=Boston)
+bestaicmod &lt;- lm(crim~rad+lstat, data=Boston)
+bestbic &lt;- mod_exhaustive$which[which.min(mod_bic),]
+bestbicmod &lt;- lm(crim~zn+indus+nox+rm+dis+rad+ptratio+lstat+medv, data=Boston)
+quality_criterion &lt;- c(&#39;R2_a&#39;, &#39;AIC&#39;, &#39;BIC&#39;)
+variables_chosen &lt;- c(&#39;lcavol, lweight, age, lbph, svi, lcp, pgg45&#39;, &#39;lcavol, lweight, age, lbph, svi&#39;, &#39;lcavol, lweight, svi&#39;)
+criterion_values &lt;- c(max(mod_exhaustive$adjr2), min(mod_aic), min(mod_bic))
+data.frame(quality_criterion, variables_chosen, criterion_values)</code></pre>
+<div data-pagedtable="false">
+<script data-pagedtable-source type="application/json">
+{"columns":[{"label":["quality_criterion"],"name":[1],"type":["chr"],"align":["left"]},{"label":["variables_chosen"],"name":[2],"type":["chr"],"align":["left"]},{"label":["criterion_values"],"name":[3],"type":["dbl"],"align":["right"]}],"data":[{"1":"R2_a","2":"lcavol, lweight, age, lbph, svi, lcp, pgg45","3":"0.4382783"},{"1":"AIC","2":"lcavol, lweight, age, lbph, svi","3":"1894.6997871"},{"1":"BIC","2":"lcavol, lweight, svi","3":"1919.1164600"}],"options":{"columns":{"min":{},"max":[10]},"rows":{"min":[10],"max":[10]},"pages":{}}}
+  </script>
+</div>
+<p><strong>Answer:</strong></p></li>
 <li><p>(10 points) For each unique candidate model chosen in parts 1 -
 4, report their <span class="math inline">\(\text{RMSE}_{\text{LOOCV}}\)</span>. Which model
-do you prefer based on this criteria?</p></li>
+do you prefer based on this criteria?</p>
+<pre class="r"><code>calc_loocv_rmse = function(model) {
+  sqrt(mean((resid(model) / (1 - hatvalues(model))) ^ 2))
+}
+partone_aic =  calc_loocv_rmse(mod_forwd_aic)
+partone_bic = calc_loocv_rmse(mod_forwd_bic)
+parttwo_aic = calc_loocv_rmse(mod_back_aic)
+parttwo_bic = calc_loocv_rmse(mod_back_bic)
+partthree_aic = calc_loocv_rmse(mod_stepwise_aic)
+partthree_bic = calc_loocv_rmse(mod_stepwise_bic)
+part_four_rsq = calc_loocv_rmse(bestr2mod)
+partfour_aic = calc_loocv_rmse(bestaicmod)
+partfour_bic = calc_loocv_rmse(bestbicmod)
+
+LOOCV &lt;- c(partone_aic, partone_bic, parttwo_aic, parttwo_bic, partthree_aic, partthree_bic, part_four_rsq, partfour_aic, partfour_bic)
+ModelNames &lt;- c(&quot;partone_aic&quot;, &quot;partone_bic&quot;, &quot;parttwo_aic&quot;, &quot;parttwo_bic&quot;, &quot;partthree_aic&quot;, &quot;partthree_bic&quot;, &quot;part_four_rsq&quot;, &quot;partfour_aic&quot;, &quot;partfour_bic&quot;)
+frame &lt;- data.frame(ModelNames, LOOCV)
+frame</code></pre>
+<div data-pagedtable="false">
+<script data-pagedtable-source type="application/json">
+{"columns":[{"label":["ModelNames"],"name":[1],"type":["chr"],"align":["left"]},{"label":["LOOCV"],"name":[2],"type":["dbl"],"align":["right"]}],"data":[{"1":"partone_aic","2":"6.4972675"},{"1":"partone_bic","2":"6.5328802"},{"1":"parttwo_aic","2":"0.7368960"},{"1":"parttwo_bic","2":"0.7381178"},{"1":"partthree_aic","2":"0.7368960"},{"1":"partthree_bic","2":"0.7381178"},{"1":"part_four_rsq","2":"6.5328912"},{"1":"partfour_aic","2":"6.6010463"},{"1":"partfour_bic","2":"6.5094032"}],"options":{"columns":{"min":{},"max":[10]},"rows":{"min":[10],"max":[10]},"pages":{}}}
+  </script>
+</div>
+<pre class="r"><code>print(frame$ModelNames[which.min(frame$LOOCV)])</code></pre>
+<pre><code>## [1] &quot;parttwo_aic&quot;</code></pre>
+<pre class="r"><code>print(min(frame$LOOCV))</code></pre>
+<pre><code>## [1] 0.736896</code></pre>
+<p><strong>Answer:</strong> The LOOCV values for each model are reported
+in the data frame above. The model we prefer is the model with the
+lowest LOOCV value which is the AIC model from part 2, and the AIC model
+from part 3 which both have predictors chosen of “……</p></li>
 </ol>
 </div>
 <div id="exercise-3-post-selection-inference-and-data-splitting-20-points" class="section level2">
